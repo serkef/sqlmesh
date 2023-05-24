@@ -33,6 +33,7 @@ export default function FolderTree({
 
   return (
     <div
+      title="File Tree"
       className={clsx(
         'py-2 px-1 overflow-hidden overflow-y-auto text-sm scrollbar scrollbar--vertical',
         className,

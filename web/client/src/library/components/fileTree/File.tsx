@@ -118,6 +118,7 @@ export default function File({
 
   return (
     <span
+      title={file.name}
       className={clsx(
         'whitespace-nowrap group/file pl-3 pr-2 py-[0.125rem] flex rounded-md',
         'hover:bg-neutral-100 dark:hover:bg-dark-lighter',

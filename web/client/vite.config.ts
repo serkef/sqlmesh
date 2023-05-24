@@ -34,7 +34,11 @@ export default defineConfig({
   },
   server:
     process.env.NODE_ENV === 'testing'
-      ? {}
+      ? {
+          proxy: {
+            '/api': 'http://localhost:8000',
+          },
+        }
       : {
           proxy: {
             '/api': 'http://api:8000',

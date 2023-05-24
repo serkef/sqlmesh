@@ -227,6 +227,7 @@ export default function Directory({
     <>
       {directory.withParent && (
         <span
+          title={directory.name}
           className={clsx(
             'w-full overflow-hidden group flex justify-between items-center rounded-md py-[0.125rem]',
             'hover:bg-neutral-100 dark:hover:bg-dark-lighter text-neutral-600 dark:text-neutral-100',
@@ -273,42 +274,69 @@ export default function Directory({
                 >
                   {directory.name}
                 </span>
-                <span className="hidden w-full group-hover:flex items-center justify-end">
-                  <ArrowsUpDownIcon
-                    onClick={(e: MouseEvent) => {
-                      e.stopPropagation()
+                <ul
+                  title="folder actions"
+                  className="hidden w-full group-hover:flex items-center justify-end"
+                >
+                  <li>
+                    <button
+                      title="Expanded/Collapsed"
+                      onClick={(e: MouseEvent) => {
+                        e.stopPropagation()
 
-                      if (directory.isCollapsed) {
-                        directory.expand()
-                      } else {
-                        directory.collapse()
-                      }
-                    }}
-                    className={clsx(
-                      `cursor-pointer inline-block ${CSS_ICON_SIZE} mr-1`,
-                      directory.isCollapsed &&
-                        'text-neutral-500 dark:text-neutral-100',
-                      directory.isExpanded &&
-                        'text-secondary-500 dark:text-primary-500',
-                    )}
-                  />
-                  <DocumentPlusIcon
-                    onClick={createFile}
-                    className={`cursor-pointer inline-block ${CSS_ICON_SIZE} mr-1 text-neutral-500 dark:text-neutral-100`}
-                  />
-                  <FolderPlusIcon
-                    onClick={createDirectory}
-                    className={`cursor-pointer inline-block ${CSS_ICON_SIZE} mr-1 text-neutral-500 dark:text-neutral-100`}
-                  />
-                  <XCircleIcon
-                    onClick={(e: MouseEvent) => {
-                      e.stopPropagation()
+                        if (directory.isCollapsed) {
+                          directory.expand()
+                        } else {
+                          directory.collapse()
+                        }
+                      }}
+                    >
+                      <ArrowsUpDownIcon
+                        className={clsx(
+                          `cursor-pointer inline-block ${CSS_ICON_SIZE} mr-1`,
+                          directory.isCollapsed &&
+                            'text-neutral-500 dark:text-neutral-100',
+                          directory.isExpanded &&
+                            'text-secondary-500 dark:text-primary-500',
+                        )}
+                      />
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      title="Create File"
+                      onClick={createFile}
+                    >
+                      <DocumentPlusIcon
+                        className={`cursor-pointer inline-block ${CSS_ICON_SIZE} mr-1 text-neutral-500 dark:text-neutral-100`}
+                      />
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      title="Create Directory"
+                      onClick={createDirectory}
+                    >
+                      <FolderPlusIcon
+                        className={`cursor-pointer inline-block ${CSS_ICON_SIZE} mr-1 text-neutral-500 dark:text-neutral-100`}
+                      />
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      title="Remove Directory"
+                      onClick={(e: MouseEvent) => {
+                        e.stopPropagation()
 
-                      removeWithConfirmation()
-                    }}
-                    className={`cursor-pointer inline-block ${CSS_ICON_SIZE} ml-2 text-danger-500`}
-                  />
-                </span>
+                        removeWithConfirmation()
+                      }}
+                    >
+                      <XCircleIcon
+                        className={`cursor-pointer inline-block ${CSS_ICON_SIZE} ml-2 text-danger-500`}
+                      />
+                    </button>
+                  </li>
+                </ul>
               </span>
             ) : (
               <div className="flex w-full items-center">
@@ -342,7 +370,7 @@ export default function Directory({
           {directory.directories.map(dir => (
             <li
               key={dir.id}
-              title={dir.name}
+              title={`Directory ${dir.name}`}
             >
               <Directory
                 directory={dir}
@@ -355,10 +383,7 @@ export default function Directory({
       {(isOpen || !directory.withParent) && directory.withFiles && (
         <ul className={clsx(directory.withParent ? 'pl-3' : 'mt-1')}>
           {directory.files.map(file => (
-            <li
-              key={file.id}
-              title={file.name}
-            >
+            <li key={file.id}>
               <File
                 file={file}
                 setConfirmation={setConfirmation}

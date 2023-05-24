@@ -1,5 +1,5 @@
 FROM node:16
-FROM mcr.microsoft.com/playwright:focal
+FROM mcr.microsoft.com/playwright:v1.34.2-focal
 
 WORKDIR /app
 
@@ -10,4 +10,5 @@ RUN apt-get update && apt-get -y install libnss3 libatk-bridge2.0-0 libdrm-dev l
 COPY web/client/package*.json .
 
 RUN npm install -g npm@latest && \
-    npm install --no-audit --no-fund --no-package-lock
+    npm install --no-audit --no-fund --no-package-lock && \
+    npx playwright install-deps 

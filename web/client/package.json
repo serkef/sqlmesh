@@ -10,8 +10,8 @@
     "format": "npm run prettier && npm run lint:fix",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit:watch": "NODE_ENV=development vitest --watch=true",
-    "test:unit": "NODE_ENV=testing vitest --watch=false",
-    "test:e2e": "NODE_ENV=testing playwright test",
+    "test:unit": "vitest --watch=false",
+    "test:e2e": "playwright test",
     "playwright:install": "playwright install --with-deps",
     "generate:api": "orval --config ./orval.config.ts"
   },
@@ -41,7 +41,7 @@
     "zustand": "^4.3.8"
   },
   "devDependencies": {
-    "@playwright/test": "^1.33.0",
+    "@playwright/test": "^1.34.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
