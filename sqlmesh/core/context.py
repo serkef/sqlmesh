@@ -61,6 +61,7 @@ from sqlmesh.core.loader import Loader, SqlMeshLoader, update_model_schemas
 from sqlmesh.core.macros import ExecutableOrMacro
 from sqlmesh.core.model import Model
 from sqlmesh.core.model.definition import _Model
+from sqlmesh.core.notification_target import NotificationTargetManager
 from sqlmesh.core.plan import Plan
 from sqlmesh.core.scheduler import Scheduler
 from sqlmesh.core.schema_loader import create_schema_file
@@ -253,6 +254,7 @@ class Context(BaseContext):
 
         # Should we dedupe notification_targets? If so how?
         self.notification_targets = (notification_targets or []) + self.config.notification_targets
+        self.notification_target_manager = NotificationTargetManager(self.notification_targets)
         self.users = (users or []) + self.config.users
         self.users = list({user.username: user for user in self.users}.values())
 
@@ -324,6 +326,7 @@ class Context(BaseContext):
             self.state_sync,
             max_workers=self.concurrent_tasks,
             console=self.console,
+            notification_target_manager=self.notification_target_manager,
         )
 
     @property
@@ -384,7 +387,12 @@ class Context(BaseContext):
             skip_janitor: Whether to skip the janitor task.
         """
         environment = environment or c.PROD
-        self.scheduler(environment=environment).run(environment, start, end, latest)
+        try:
+            self.notification_target_manager.notify_run_start()
+            self.scheduler(environment=environment).run(environment, start, end, latest)
+        except Exception as e:
+            self.notification_target_manager.notify_run_failure()
+            raise e
 
         if not skip_janitor and environment.lower() == c.PROD:
             self._run_janitor()
@@ -738,7 +746,12 @@ class Context(BaseContext):
             return
         if plan.uncategorized:
             raise PlanError("Can't apply a plan with uncategorized changes.")
-        self._scheduler.create_plan_evaluator(self).evaluate(plan)
+        try:
+            self.notification_target_manager.notify_apply_start()
+            self._scheduler.create_plan_evaluator(self).evaluate(plan)
+        except Exception as e:
+            self.notification_target_manager.notify_apply_failure(e)
+            raise e
 
     def diff(self, environment: t.Optional[str] = None, detailed: bool = False) -> None:
         """Show a diff of the current context with a given environment.
