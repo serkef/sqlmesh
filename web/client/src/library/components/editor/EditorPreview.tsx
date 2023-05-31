@@ -14,10 +14,11 @@ import { EnumVariant } from '~/types/enum'
 import { ModelSQLMeshModel } from '@models/sqlmesh-model'
 import { useLineageFlow } from '@components/graph/context'
 import { EnumFileExtensions } from '@models/file'
-import CodeEditor, { useSQLMeshModelExtensions } from './EditorCode'
+import CodeEditor from './EditorCode'
 import { EnumRoutes } from '~/routes'
 import { useNavigate } from 'react-router-dom'
 import { DisplayError } from '@components/report/ReportErrors'
+import { useSQLMeshModelExtensions } from './hooks'
 
 const ModelLineage = lazy(
   async () => await import('@components/graph/ModelLineage'),
