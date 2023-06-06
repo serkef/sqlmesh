@@ -52,7 +52,16 @@ class NotificationStatus(str, Enum):
         return self == NotificationStatus.PROGRESS
 
 
-def notify_if(event: str) -> t.Callable:
+class NotificationEvent(str, Enum):
+    ALL_EVENTS = "all_events"
+    APPLY_START = "apply_start"
+    RUN_START = "run_start"
+    APPLY_FAILURE = "apply_failure"
+    RUN_FAILURE = "run_failure"
+    AUDIT_FAILURE = "audit_failure"
+
+
+def notify(event: str) -> t.Callable:
     """Decorator used to register 'notify' methods and the events they correspond to."""
 
     def decorator(f: t.Callable) -> t.Callable:
@@ -74,38 +83,34 @@ class BaseNotificationTarget(PydanticModel):
     """
 
     type_: str
-    notify_on_apply_start = False
-    notify_on_run_start = False
-    notify_on_apply_failure = False
-    notify_on_run_failure = False
-    notify_on_audit_failure = False
+    notify_on: t.Set[NotificationEvent] = set()
 
     def send(self, notification_status: NotificationStatus, msg: str, **kwargs: t.Any) -> None:
         """
         Sends notification with the provided message.
         """
 
-    @notify_if("notify_on_apply_start")
+    @notify("apply_start")
     def notify_apply_start(self) -> None:
         """Notify when an apply starts."""
         self.send(NotificationStatus.INFO, "Plan apply started.")
 
-    @notify_if("notify_on_run_start")
+    @notify("run_start")
     def notify_run_start(self) -> None:
         """Notify when an apply starts."""
         self.send(NotificationStatus.INFO, "SQLMesh run started.")
 
-    @notify_if("notify_on_apply_failure")
+    @notify("apply_failure")
     def notify_apply_failure(self, exc: Exception) -> None:
         """Notify in the case of an apply failure."""
         self.send(NotificationStatus.FAILURE, f"Failed to apply plan.\n{exc}")
 
-    @notify_if("notify_on_run_failure")
+    @notify("run_failure")
     def notify_run_failure(self, exc: Exception) -> None:
         """Notify in the case of a run failure."""
         self.send(NotificationStatus.FAILURE, "Failed to run SQLMesh.\n{exc}")
 
-    @notify_if("notify_on_audit_failure")
+    @notify("audit_failure")
     def notify_audit_failure(self, audit_error: AuditError) -> None:
         """Notify in the case of an audit failure."""
         self.send(NotificationStatus.FAILURE, str(audit_error))
@@ -125,7 +130,10 @@ class NotificationTargetManager:
         """Call the 'notify_`event`' function of all notification targets that care about the event."""
         for notification_target in self.notification_targets:
             flag_name = NOTIFICATION_EVENTS[_name]
-            if getattr(notification_target, flag_name):
+            if (
+                flag_name in notification_target.notify_on
+                or NotificationEvent.ALL_EVENTS in notification_target.notify_on
+            ):
                 notify_func = getattr(notification_target, _name)
                 notify_func(*args, **kwargs)
 

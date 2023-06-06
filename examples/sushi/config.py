@@ -55,15 +55,11 @@ required_approvers_config = Config(
     users=[User(username="test", roles=[UserRole.REQUIRED_APPROVER])],
     notification_targets=[
         SlackWebhookNotificationTarget(
-            notify_on_apply_start=True,
-            notify_on_run_start=True,
-            notify_on_apply_failure=True,
-            notify_on_run_failure=True,
-            notify_on_audit_failure=True,
+            notify_on=["apply_start", "run_start"],
             url=os.getenv("SLACK_WEBHOOK_URL"),
         ),
         CustomSMTPNotificationTarget(
-            notify_on_run_failure=True,
+            notify_on=["run_failure"],
             host=os.getenv("SMTP_HOST"),
             user=os.getenv("SMTP_USER"),
             password=os.getenv("SMTP_PASSWORD"),
